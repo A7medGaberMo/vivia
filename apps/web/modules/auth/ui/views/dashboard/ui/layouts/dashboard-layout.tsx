@@ -7,11 +7,8 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-// --- Layout Component Definition ---
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
-    // --- Authentication Boundary ---
-    // Wraps the entire dashboard. If not authenticated, redirects occur here.
     <AuthGuard>
       {/* --- Semantic Structure --- */}
       {/* flex-1 ensures it takes available height. flex-col stacks children vertically. */}

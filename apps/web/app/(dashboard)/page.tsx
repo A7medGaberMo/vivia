@@ -1,12 +1,9 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@workspace/backend/convex/_generated/api";
-import { DashboardSidebar } from "@/modules/auth/ui/views/dashboard/ui/components/dashboard-sidebar";
+import { DashboardView } from "@/modules/auth/ui/views/dashboard/ui/views/DashboardView";
 
-export default function Page() {
-  // const users = useQuery(api.users.getMany);
-  // const addUser = useMutation(api.users.createUser);
+const DashboardPage = () => {
+  return <DashboardView />;
+};
 
-  return <div>Welcome to the Dashboard</div>;
-}
+export default DashboardPage;
