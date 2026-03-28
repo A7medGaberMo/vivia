@@ -5,8 +5,8 @@ import { api } from "@workspace/backend/convex/_generated/api";
 import { DashboardSidebar } from "@/modules/auth/ui/views/dashboard/ui/components/dashboard-sidebar";
 
 export default function Page() {
-  const users = useQuery(api.users.getMany);
-  const addUser = useMutation(api.users.createUser);
+  // const users = useQuery(api.users.getMany);
+  // const addUser = useMutation(api.users.createUser);
 
-  return <div></div>;
+  return <div>Welcome to the Dashboard</div>;
 }

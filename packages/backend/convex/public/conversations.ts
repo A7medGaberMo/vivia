@@ -42,7 +42,7 @@ export const getMany = query({
         });
 
         if (messages.page.length > 0) {
-          lastMessage = messages.page[0];
+          lastMessage = messages.page[0] ?? null;
         }
 
         return {

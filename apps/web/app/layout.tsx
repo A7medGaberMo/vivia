@@ -44,7 +44,14 @@ export default function RootLayout({
             ClerkProvider is on the outside.
             Your custom Providers component (with themes/convex) is on the inside.
         */}
-        <ClerkProvider>
+        <ClerkProvider
+          appearance={{
+            variables: {
+              colorPrimary: "#3C82F6"
+            }
+          }}
+
+        >
           <Providers>
             {/* 9. Added the AuthGuard component to protect routes */}
             <Toaster />

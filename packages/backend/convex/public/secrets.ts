@@ -1,10 +1,11 @@
 import { ConvexError, v } from "convex/values";
 import { internal } from "../_generated/api";
-import { action } from "../_generated/server";
+import { action, ActionCtx } from "../_generated/server";
 import { getSecretValue, parseSecretString } from "../lib/secrets";
 
 export const getVapiSecrets = action({
-    handler: async (ctx) => {
+    args: {},
+    handler: async (ctx: ActionCtx): Promise<{ publicApiKey: string } | null> => {
         const plugin = await ctx.runQuery(
             internal.system.plugins.getByServiceAndNamespace,
             { service: "vapi" }

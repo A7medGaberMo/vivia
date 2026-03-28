@@ -3,6 +3,10 @@ import { v } from "convex/values";
 
 const schema = defineSchema({
 
+  subscriptions: defineTable({
+    status: v.string(),
+  }),
+
   widgetSettings: defineTable({
     greetMessage: v.string(),
     defaultSuggestions: v.object({
