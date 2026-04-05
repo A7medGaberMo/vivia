@@ -2,23 +2,19 @@
 
 import * as React from "react";
 
-// ─── Color accent definitions using CSS oklch tokens ─────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type ColorThemeKey =
-  | "indigo"
   | "azure"
   | "emerald"
-  | "ruby"
-  | "amber"
   | "violet"
-  | "rose";
+  | "rose"
+  | "amber";
 
 export interface ColorTheme {
   key: ColorThemeKey;
   label: string;
-  /** Preview swatch color (hex for simplicity in UI) */
   swatch: string;
-  /** CSS variables overrides injected into :root */
   vars: {
     "--primary": string;
     "--ring": string;
@@ -28,23 +24,13 @@ export interface ColorTheme {
   };
 }
 
+// ─── Themes (5 Distinct Colors) ───────────────────────────────────────────────
+
 export const COLOR_THEMES: ColorTheme[] = [
-  {
-    key: "indigo",
-    label: "Indigo",
-    swatch: "#6366f1",
-    vars: {
-      "--primary": "oklch(0.6231 0.188 259.8145)",
-      "--ring": "oklch(0.6231 0.188 259.8145)",
-      "--sidebar-primary": "oklch(0.6231 0.188 259.8145)",
-      "--sidebar-ring": "oklch(0.6231 0.188 259.8145)",
-      "--chart-1": "oklch(0.6231 0.188 259.8145)",
-    },
-  },
   {
     key: "azure",
     label: "Azure",
-    swatch: "#0ea5e9",
+    swatch: "#0ea5e9", // Tailwind Sky 500
     vars: {
       "--primary": "oklch(0.6488 0.1897 239.42)",
       "--ring": "oklch(0.6488 0.1897 239.42)",
@@ -56,7 +42,7 @@ export const COLOR_THEMES: ColorTheme[] = [
   {
     key: "emerald",
     label: "Emerald",
-    swatch: "#10b981",
+    swatch: "#10b981", // Tailwind Emerald 500
     vars: {
       "--primary": "oklch(0.6963 0.1699 162.48)",
       "--ring": "oklch(0.6963 0.1699 162.48)",
@@ -66,33 +52,9 @@ export const COLOR_THEMES: ColorTheme[] = [
     },
   },
   {
-    key: "ruby",
-    label: "Ruby",
-    swatch: "#ef4444",
-    vars: {
-      "--primary": "oklch(0.6272 0.2261 27.325)",
-      "--ring": "oklch(0.6272 0.2261 27.325)",
-      "--sidebar-primary": "oklch(0.6272 0.2261 27.325)",
-      "--sidebar-ring": "oklch(0.6272 0.2261 27.325)",
-      "--chart-1": "oklch(0.6272 0.2261 27.325)",
-    },
-  },
-  {
-    key: "amber",
-    label: "Amber",
-    swatch: "#f59e0b",
-    vars: {
-      "--primary": "oklch(0.7669 0.177 75.26)",
-      "--ring": "oklch(0.7669 0.177 75.26)",
-      "--sidebar-primary": "oklch(0.7669 0.177 75.26)",
-      "--sidebar-ring": "oklch(0.7669 0.177 75.26)",
-      "--chart-1": "oklch(0.7669 0.177 75.26)",
-    },
-  },
-  {
     key: "violet",
     label: "Violet",
-    swatch: "#8b5cf6",
+    swatch: "#8b5cf6", // Tailwind Violet 500
     vars: {
       "--primary": "oklch(0.6324 0.2201 296.67)",
       "--ring": "oklch(0.6324 0.2201 296.67)",
@@ -104,13 +66,25 @@ export const COLOR_THEMES: ColorTheme[] = [
   {
     key: "rose",
     label: "Rose",
-    swatch: "#f43f5e",
+    swatch: "#f43f5e", // Tailwind Rose 500
     vars: {
-      "--primary": "oklch(0.6441 0.2303 14.74)",
-      "--ring": "oklch(0.6441 0.2303 14.74)",
-      "--sidebar-primary": "oklch(0.6441 0.2303 14.74)",
-      "--sidebar-ring": "oklch(0.6441 0.2303 14.74)",
-      "--chart-1": "oklch(0.6441 0.2303 14.74)",
+      "--primary": "oklch(0.645 0.246 16.439)",
+      "--ring": "oklch(0.645 0.246 16.439)",
+      "--sidebar-primary": "oklch(0.645 0.246 16.439)",
+      "--sidebar-ring": "oklch(0.645 0.246 16.439)",
+      "--chart-1": "oklch(0.645 0.246 16.439)",
+    },
+  },
+  {
+    key: "amber",
+    label: "Amber",
+    swatch: "#f59e0b", // Tailwind Amber 500
+    vars: {
+      "--primary": "oklch(0.76 0.177 75.3)",
+      "--ring": "oklch(0.76 0.177 75.3)",
+      "--sidebar-primary": "oklch(0.76 0.177 75.3)",
+      "--sidebar-ring": "oklch(0.76 0.177 75.3)",
+      "--chart-1": "oklch(0.76 0.177 75.3)",
     },
   },
 ];
@@ -126,29 +100,44 @@ interface ColorThemeContextValue {
 }
 
 const ColorThemeContext = React.createContext<ColorThemeContextValue>({
-  colorTheme: "indigo",
-  setColorTheme: () => {},
+  colorTheme: "azure",
+  setColorTheme: () => { },
   themes: COLOR_THEMES,
 });
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
-export function ColorThemeProvider({ children }: { children: React.ReactNode }) {
-  const [colorTheme, setColorThemeState] = React.useState<ColorThemeKey>("indigo");
+export function ColorThemeProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [colorTheme, setColorThemeState] =
+    React.useState<ColorThemeKey>("azure");
 
-  // Load persisted theme on mount
+  // load + validate
   React.useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as ColorThemeKey | null;
-    if (stored && COLOR_THEMES.find((t) => t.key === stored)) {
-      setColorThemeState(stored);
+    const stored = localStorage.getItem(STORAGE_KEY);
+
+    if (
+      stored &&
+      COLOR_THEMES.some((t) => t.key === stored)
+    ) {
+      setColorThemeState(stored as ColorThemeKey);
+    } else {
+      // Fallback to default azure if indigo or invalid was stored
+      setColorThemeState("azure");
+      localStorage.setItem(STORAGE_KEY, "azure");
     }
   }, []);
 
-  // Apply CSS variables whenever theme changes
+  // apply theme
   React.useEffect(() => {
     const theme = COLOR_THEMES.find((t) => t.key === colorTheme);
     if (!theme) return;
+
     const root = document.documentElement;
+
     Object.entries(theme.vars).forEach(([key, value]) => {
       root.style.setProperty(key, value);
     });
@@ -160,7 +149,9 @@ export function ColorThemeProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   return (
-    <ColorThemeContext.Provider value={{ colorTheme, setColorTheme, themes: COLOR_THEMES }}>
+    <ColorThemeContext.Provider
+      value={{ colorTheme, setColorTheme, themes: COLOR_THEMES }}
+    >
       {children}
     </ColorThemeContext.Provider>
   );

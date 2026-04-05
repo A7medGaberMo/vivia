@@ -3,31 +3,25 @@
 import { UserButton } from "@clerk/nextjs";
 import {
   CreditCardIcon,
+  ChevronLeftIcon,
   InboxIcon,
   LayoutDashboardIcon,
   LibraryBigIcon,
   Mic,
   PaletteIcon,
-  PanelLeftClose,
-  PanelLeftOpen,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { ColorThemePicker } from "@/components/color-theme-picker";
 
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-  useSidebar,
-} from "@workspace/ui/components/sidebar";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
 
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -50,240 +44,275 @@ const accountItems = [
 
 // ─── NavSection ───────────────────────────────────────────────────────────────
 
+const NavItem = ({
+  item,
+  active,
+  isCollapsed,
+}: {
+  item: { label: string; href: string; icon: React.ElementType };
+  active: boolean;
+  isCollapsed: boolean;
+}) => {
+  const content = (
+    <Link
+      href={item.href}
+      className={cn(
+        "relative flex items-center h-10 w-full rounded-md font-medium transition-all duration-200 outline-none group/link active:scale-[0.98]",
+        !active && "text-muted-foreground hover:text-primary hover:bg-primary/[0.04] dark:hover:bg-primary/[0.06]",
+        isCollapsed ? "justify-center px-0" : "px-3 gap-3",
+        active && [
+          "text-primary bg-primary/[0.06] hover:bg-primary/[0.1]",
+          "dark:bg-primary/[0.12] dark:hover:bg-primary/[0.18]",
+        ]
+      )}
+    >
+      {/* Active left bar indicator */}
+      {active && (
+        <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-primary" />
+      )}
+
+      {/* Icon */}
+      <span
+        className={cn(
+          "relative flex items-center justify-center shrink-0 transition-colors duration-200",
+          isCollapsed ? "size-6" : "size-5",
+          active ? "text-primary" : "text-muted-foreground group-hover/link:text-primary"
+        )}
+      >
+        <item.icon className={cn(isCollapsed ? "size-5" : "size-[18px]")} />
+      </span>
+
+      {/* Label — smooth expand/collapse */}
+      <span
+        className={cn(
+          "whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden text-[13.5px]",
+          isCollapsed
+            ? "opacity-0 w-0 max-w-0"
+            : "opacity-100 max-w-[180px]"
+        )}
+      >
+        {item.label}
+      </span>
+    </Link>
+  );
+
+  if (isCollapsed) {
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>{content}</TooltipTrigger>
+        <TooltipContent side="right" sideOffset={16} className="font-medium">
+          {item.label}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return content;
+};
+
 const NavSection = ({
   label,
   items,
   isActive,
-  isOpen,
+  isCollapsed,
 }: {
   label: string;
-  items: { label: string; href: string; icon: any }[];
+  items: { label: string; href: string; icon: React.ElementType }[];
   isActive: (href: string) => boolean;
-  isOpen: boolean;
+  isCollapsed: boolean;
 }) => (
-  <SidebarGroup className="p-0 mb-2">
-    {/* Section label — fades in/out with sidebar width */}
+  <div className="flex flex-col mb-4">
+    {/* Section label — animated expand/collapse */}
     <div
       className={cn(
-        "px-2.5 mb-1.5 overflow-hidden transition-all duration-300",
-        isOpen ? "opacity-100 max-h-6" : "opacity-0 max-h-0"
+        "overflow-hidden transition-all duration-300 ease-in-out",
+        isCollapsed
+          ? "opacity-0 h-0"
+          : "opacity-100 h-8 px-3 flex items-center"
       )}
     >
-      <p className="text-[9px] font-bold tracking-[0.18em] uppercase text-muted-foreground">
+      <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-muted-foreground/40 select-none">
         {label}
       </p>
     </div>
 
-    <SidebarGroupContent>
-      <SidebarMenu className="gap-0.5">
-        {items.map((item) => {
-          const active = isActive(item.href);
-          return (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={active}
-                tooltip={item.label}
-                className={cn(
-                  "relative h-9 rounded-[8px] text-[13px] font-medium transition-all duration-200",
-                  "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent",
-                  active && "text-foreground bg-sidebar-accent shadow-sm"
-                )}
-              >
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3",
-                    isOpen ? "px-2.5" : "justify-center px-0"
-                  )}
-                >
-                  {/* Active left bar */}
-                  {active && (
-                    <span
-                      className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-primary"
-                      style={{
-                        boxShadow:
-                          "0 0 8px rgba(var(--color-primary), 0.5)",
-                      }}
-                    />
-                  )}
-
-                  {/* Icon wrapper */}
-                  <span
-                    className={cn(
-                      "relative flex items-center justify-center size-5 shrink-0 transition-all duration-200",
-                      active && "text-primary"
-                    )}
-                  >
-                    <item.icon className="size-4" />
-                  </span>
-
-                  {/* Label — slides in */}
-                  <span
-                    className={cn(
-                      "whitespace-nowrap transition-all duration-300 overflow-hidden",
-                      isOpen
-                        ? "opacity-100 max-w-[160px]"
-                        : "opacity-0 max-w-0"
-                    )}
-                  >
-                    {item.label}
-                  </span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          );
-        })}
-      </SidebarMenu>
-    </SidebarGroupContent>
-  </SidebarGroup>
+    <ul className={cn("flex flex-col gap-1", isCollapsed && "items-center")}>
+      {items.map((item) => {
+        const active = isActive(item.href);
+        return (
+          <li key={item.href} className="w-full px-2">
+            <NavItem item={item} active={active} isCollapsed={isCollapsed} />
+          </li>
+        );
+      })}
+    </ul>
+  </div>
 );
 
 // ─── DashboardSidebar ─────────────────────────────────────────────────────────
 
 export const DashboardSidebar = () => {
   const pathname = usePathname();
-  const { toggleSidebar, open } = useSidebar();
+  const [isMounted, setIsMounted] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const storedState = localStorage.getItem("sidebar-collapsed");
+    if (storedState !== null) {
+      setIsCollapsed(storedState === "true");
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem("sidebar-collapsed", String(newState));
+  };
 
   const isActive = (url: string) => {
     if (url === "/") return pathname === "/";
     return pathname.startsWith(url);
   };
 
+  // Keep exact CSS layout properties before hydration completes
+  // to avoid ugly flashes, defaulting to expanded (or assuming smooth visual transition).
+  const sidebarWidthClass = isCollapsed ? "w-[72px]" : "w-[240px]";
+
   return (
-    <Sidebar
-      collapsible="icon"
-      className="group/sidebar bg-sidebar border-r border-sidebar-border"
+    <aside
+      className={cn(
+        "h-full shrink-0 flex flex-col bg-transparent transition-[width] duration-300 ease-in-out relative group",
+        sidebarWidthClass
+      )}
     >
-      <SidebarRail />
-
-      {/* ── Ambient top glow ── */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-40 z-0 opacity-50 dark:opacity-20"
-        style={{
-          background:
-            "radial-gradient(ellipse 120% 60% at 50% 0%, hsl(var(--chart-1)/0.1) 0%, transparent 60%)",
-        }}
-      />
-
       {/* ── Header ── */}
-      <SidebarHeader className="px-3 pt-4 pb-3 relative z-10">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <div className="flex items-center gap-2">
-              {/* Logo */}
-              <SidebarMenuButton
-                asChild
-                tooltip="Home"
-                className="h-auto! hover:bg-transparent! p-0! flex-1! min-w-0"
-              >
-                <Link href="/" className="flex items-center gap-2.5 min-w-0">
-                  {/* Logo mark */}
-                  <div
-                    className="flex items-center justify-center size-[34px] rounded-[10px] shrink-0 transition-all duration-300 shadow-sm border border-border/50"
-                  >
-                    <Image
-                      src="/vivia-logo.jpeg"
-                      alt="Vivia"
-                      width={20}
-                      height={20}
-                      className="rounded-md"
-                    />
-                  </div>
+      <div className="h-14 flex items-center justify-between px-3 border-b border-border/30 shrink-0">
+        <Link
+          href="/"
+          className={cn(
+            "flex items-center gap-3 overflow-hidden outline-none transition-all duration-300 rounded-md",
+            isCollapsed ? "justify-center w-full px-0" : "px-1"
+          )}
+        >
+          {/* Logo mark */}
+          <div className="flex items-center justify-center size-[30px] rounded-lg shrink-0 bg-primary/10 border border-primary/20 text-primary transition-all duration-300 ml-[2px]">
+            <Image
+              src="/vivia-logo.jpeg"
+              alt="Vivia"
+              width={18}
+              height={18}
+              className="rounded-[5px]"
+            />
+          </div>
 
-                  {/* Brand text */}
-                  <div
-                    className={cn(
-                      "flex flex-col overflow-hidden transition-all duration-300",
-                      open
-                        ? "opacity-100 max-w-[120px]"
-                        : "opacity-0 max-w-0"
-                    )}
-                  >
-                    <p className="text-[13px] font-semibold text-foreground tracking-tight leading-none whitespace-nowrap">
-                      Vivia
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5 tracking-wide whitespace-nowrap">
-                      Workspace
-                    </p>
-                  </div>
-                </Link>
-              </SidebarMenuButton>
+          {/* Brand text */}
+          <div
+            className={cn(
+              "flex flex-col transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden",
+              isCollapsed
+                ? "opacity-0 w-0"
+                : "opacity-100 max-w-[120px]"
+            )}
+          >
+            <p className="text-[14px] font-bold text-foreground tracking-tight leading-none group-hover:text-primary transition-colors">
+              Vivia
+            </p>
+            <p className="text-[11px] text-muted-foreground/70 mt-[3px] tracking-wide font-medium leading-none">
+              Workspace
+            </p>
+          </div>
+        </Link>
+      </div>
 
-              {/* ── Toggle button — always visible, rotates icon ── */}
-              <button
-                onClick={toggleSidebar}
-                aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
-                className={cn(
-                  "relative flex items-center justify-center rounded-[8px] shrink-0",
-                  "size-7 transition-all duration-200",
-                  "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent",
-                  !open && "mx-auto"
-                )}
-              >
-                {open ? (
-                  <PanelLeftClose className="size-3.5" />
-                ) : (
-                  <PanelLeftOpen className="size-3.5" />
-                )}
-              </button>
-            </div>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
-      {/* ── Gradient divider ── */}
-      <div
-        className="relative z-10 mx-3 mb-3 h-px bg-sidebar-border"
-      />
+      {/* Toggle button overlapping right border (Vertical Center) */}
+      <button
+        onClick={toggleSidebar}
+        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        className={cn(
+          "absolute -right-3.5 top-1/2 -translate-y-1/2 z-50 flex items-center justify-center rounded-full w-7 h-12 border border-border/50 bg-background/95 backdrop-blur shadow-[0_0_8px_rgba(0,0,0,0.06)] text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-300",
+          "opacity-0 md:group-hover:opacity-100 focus:opacity-100"
+        )}
+      >
+        <ChevronLeftIcon
+          className={cn(
+            "size-[18px] transition-transform duration-300 ease-in-out",
+            isCollapsed && "rotate-180"
+          )}
+        />
+      </button>
 
       {/* ── Nav ── */}
-      <SidebarContent className="px-2 gap-0 relative z-10 overflow-x-hidden">
-        <NavSection
-          label="Support"
-          items={customerSupportItems}
-          isActive={isActive}
-          isOpen={open}
-        />
-        <NavSection
-          label="Configuration"
-          items={configurationItems}
-          isActive={isActive}
-          isOpen={open}
-        />
-        <NavSection
-          label="Account"
-          items={accountItems}
-          isActive={isActive}
-          isOpen={open}
-        />
-      </SidebarContent>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 flex flex-col gap-1 custom-scrollbar">
+        <TooltipProvider>
+          <NavSection
+            label="Support"
+            items={customerSupportItems}
+            isActive={isActive}
+            isCollapsed={isCollapsed}
+          />
+          <NavSection
+            label="Configuration"
+            items={configurationItems}
+            isActive={isActive}
+            isCollapsed={isCollapsed}
+          />
+          <NavSection
+            label="Account"
+            items={accountItems}
+            isActive={isActive}
+            isCollapsed={isCollapsed}
+          />
+        </TooltipProvider>
+      </div>
 
       {/* ── Footer ── */}
-      <SidebarFooter
-        className="px-2 py-3 relative z-10 border-t border-sidebar-border"
-      >
-        <SidebarMenu>
-          <SidebarMenuItem>
+      <div className="flex flex-col shrink-0 border-t border-border/40 pb-3 pt-3 px-3 gap-2">
+        {/* Color Theme Picker (Assuming it handles `isOpen` or similar prop gracefully) */}
+        {!isCollapsed && isMounted && (
+          <div className="px-1 mt-1 mb-2">
+            <ColorThemePicker isOpen={true} />
+          </div>
+        )}
+
+        <div
+          className={cn(
+            "flex items-center",
+            isCollapsed ? "justify-center" : "justify-start px-1"
+          )}
+        >
+          {isMounted && (
             <UserButton
-              showName
+              showName={!isCollapsed}
               appearance={{
                 elements: {
-                  rootBox: "w-full! h-[42px]!",
-                  userButtonTrigger:
-                    "w-full! px-2.5! py-2! rounded-[9px]! border border-transparent hover:bg-sidebar-accent! group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-1.5! transition-all! duration-200!",
-                  userButtonBox:
-                    "w-full! flex-row-reverse! justify-end! gap-2.5! group-data-[collapsible=icon]:justify-center!",
-                  userButtonOuterIdentifier:
-                    "pl-0! text-[12px]! font-medium! text-sidebar-foreground! group-data-[collapsible=icon]:hidden!",
-                  avatarBox:
-                    "size-[26px]! ring-1! ring-primary/20! ring-offset-0!",
+                  rootBox: cn(
+                    "w-full flex transition-all duration-300",
+                    isCollapsed ? "justify-center" : "justify-start"
+                  ),
+                  userButtonTrigger: cn(
+                    "w-full transition-all duration-200 outline-none hover:bg-accent/60 p-1.5 rounded-lg border border-transparent focus:ring-2 focus:ring-primary/20",
+                    isCollapsed ? "px-1.5 justify-center" : "px-2"
+                  ),
+                  userButtonBox: cn(
+                    "w-full flex gap-3 items-center",
+                    isCollapsed ? "justify-center" : "justify-start flex-row"
+                  ),
+                  userButtonOuterIdentifier: cn(
+                    "pl-0 text-[14px] transition-all duration-200",
+                    isCollapsed ? "hidden" : "block",
+                    // Light Mode: Quiet & Elegant
+                    "font-medium text-muted-foreground/80",
+                    // Dark Mode: High Contrast & Bold (As requested)
+                    "dark:font-bold dark:!text-foreground dark:!opacity-100"
+                  ),
+                  avatarBox: "size-7 ring-1 ring-border shrink-0 shadow-sm",
                 },
               }}
             />
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
+          )}
+        </div>
+      </div>
+    </aside>
   );
 };
