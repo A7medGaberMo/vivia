@@ -44,7 +44,12 @@ export const create = action({
       throw new ConvexError("Cannot add messages to a resolved conversation");
     }
 
-    const shouldTriggerAgent = conversation.status === "unresolved";
+    await ctx.runMutation(internal.system.contactSessions.refresh, {
+      contactSessionId: contactSessionId,
+    });
+
+    const subscription = await ctx.runQuery(internal.system.subscription.getOne);
+    const shouldTriggerAgent = conversation.status === "unresolved" && subscription?.status === "active";
     if (shouldTriggerAgent) {
       await supportAgent.generateText(
         ctx,

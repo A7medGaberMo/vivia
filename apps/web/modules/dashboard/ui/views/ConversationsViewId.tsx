@@ -33,6 +33,7 @@ import { Form, FormField } from "@workspace/ui/components/form";
 import { useState } from "react";
 import { ConversationStatusButton } from "../components/conversation-status-button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
+import { toast } from "sonner";
 
 const forSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -138,6 +139,7 @@ export const ConversationsViewId = ({
       });
       form.setValue("message", enhancedText);
     } catch (error) {
+      toast.error("Failed to enhance response");
       console.error("Failed to enhance response:", error);
     } finally {
       setIsEnhancing(false);
