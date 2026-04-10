@@ -49,7 +49,8 @@ export const create = action({
     });
 
     const subscription = await ctx.runQuery(internal.system.subscription.getOne);
-    const shouldTriggerAgent = conversation.status === "unresolved" && subscription?.status === "active";
+    const shouldTriggerAgent =
+      conversation.status === "unresolved" && subscription?.status === "active";
     if (shouldTriggerAgent) {
       await supportAgent.generateText(
         ctx,
@@ -68,7 +69,10 @@ export const create = action({
     } else {
       await saveMessage(ctx, components.agent, {
         threadId: conversation.threadId,
-        prompt: prompt,
+        message: {
+          role: "user",
+          content: prompt,
+        },
       });
     }
   },

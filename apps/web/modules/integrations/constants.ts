@@ -24,13 +24,13 @@ export const INTEGRATIONS = [
 export type IntegrationId = (typeof INTEGRATIONS)[number]["id"];
 
 export const HTML_SCRIPT =
-    '<script data-organization-id="{{ORGANIZATIONID}}"></script>';
+    '<script src="http://localhost:3000/widget.js" data-organization-id="{{ORGANIZATIONID}}"></script>';
 
 export const REACT_SCRIPT =
-    '<script data-organization-id="{{ORGANIZATIONID}}"></script>';
+    '<script "http://localhost:3000/widget.js" data-organization-id="{{ORGANIZATIONID}}"></script>';
 
 export const NEXTJS_SCRIPT =
-    '<script data-organization-id="{{ORGANIZATIONID}}"></script>';
+    '<script "http://localhost:3000/widget.js" data-organization-id="{{ORGANIZATIONID}}"></script>';
 
 export const JAVASCRIPT_SCRIPT =
-    '<script data-organization-id="{{ORGANIZATIONID}}"></script>';
+    '<script "http://localhost:3000/widget.js" data-organization-id="{{ORGANIZATIONID}}"></script>';
