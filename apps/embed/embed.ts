@@ -32,7 +32,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
 
     // Exit if no organization ID
     if (!organizationId) {
-        console.error('Echo Widget: data-organization-id attribute is required');
+        console.error('Vivia Widget: data-organization-id attribute is required');
         return;
     }
 
@@ -47,7 +47,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
     function render() {
         // Create floating action button
         button = document.createElement('button');
-        button.id = 'echo-widget-button';
+        button.id = 'vivia-widget-button';
         button.innerHTML = chatBubbleIcon;
         button.style.cssText = `
       position: fixed;
@@ -56,7 +56,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: #3b82f6;
+      background: #09090b;
       color: white;
       border: none;
       cursor: pointer;
@@ -64,23 +64,23 @@ import { chatBubbleIcon, closeIcon } from './icons';
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 24px rgba(59, 130, 246, 0.35);
-      transition: all 0.2s ease;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
     `;
 
         button.addEventListener('click', toggleWidget);
         button.addEventListener('mouseenter', () => {
-            if (button) button.style.transform = 'scale(1.05)';
+            if (button) button.style.transform = 'scale(1.08) translateY(-2px)';
         });
         button.addEventListener('mouseleave', () => {
-            if (button) button.style.transform = 'scale(1)';
+            if (button) button.style.transform = 'scale(1) translateY(0)';
         });
 
         document.body.appendChild(button);
 
         // Create container (hidden by default)
         container = document.createElement('div');
-        container.id = 'echo-widget-container';
+        container.id = 'vivia-widget-container';
         container.style.cssText = `
       position: fixed;
       ${position === 'bottom-right' ? 'right: 20px;' : 'left: 20px;'}
@@ -92,11 +92,12 @@ import { chatBubbleIcon, closeIcon } from './icons';
       z-index: 999998;
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
       display: none;
       opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.3s ease;
+      transform: translateY(20px) scale(0.95);
+      transform-origin: ${position === 'bottom-right' ? 'bottom right' : 'bottom left'};
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     `;
 
         // Create iframe
@@ -156,7 +157,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
             setTimeout(() => {
                 if (container) {
                     container.style.opacity = '1';
-                    container.style.transform = 'translateY(0)';
+                    container.style.transform = 'translateY(0) scale(1)';
                 }
             }, 10);
             // Change button icon to close
@@ -168,14 +169,14 @@ import { chatBubbleIcon, closeIcon } from './icons';
         if (container && button) {
             isOpen = false;
             container.style.opacity = '0';
-            container.style.transform = 'translateY(10px)';
+            container.style.transform = 'translateY(20px) scale(0.95)';
             // Hide after animation
             setTimeout(() => {
                 if (container) container.style.display = 'none';
             }, 300);
             // Change button icon back to chat
             button.innerHTML = chatBubbleIcon;
-            button.style.background = '#3b82f6';
+            button.style.background = '#09090b';
         }
     }
 
@@ -211,7 +212,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
     }
 
     // Expose API to global scope
-    (window as any).EchoWidget = {
+    (window as any).ViviaWidget = {
         init: reinit,
         show,
         hide,

@@ -6,7 +6,7 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve(__dirname, "embed.ts"),
-            name: "EchoWidget",
+            name: "ViviaWidget",
             fileName: "widget",
             formats: ["iife"]
         },
