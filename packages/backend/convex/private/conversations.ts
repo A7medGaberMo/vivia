@@ -56,7 +56,7 @@ export const getMany = query({
         });
 
         if (messages.page.length > 0) {
-          lastMessage = messages.page[0];
+          lastMessage = messages.page[0] ?? null;
         }
 
         return {
@@ -144,5 +144,34 @@ export const updateStatus = mutation({
     await ctx.db.patch(conversationId, {
       status,
     });
+  },
+});
+
+export const getStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError({
+        message: "Unauthorized",
+        code: "unauthorized",
+      });
+    }
+
+    const conversations = await ctx.db.query("conversations").collect();
+    
+    let total = 0;
+    let unresolved = 0;
+    let resolved = 0;
+    let escalated = 0;
+
+    for (const conv of conversations) {
+      total++;
+      if (conv.status === "unresolved") unresolved++;
+      if (conv.status === "resolved") resolved++;
+      if (conv.status === "escalated") escalated++;
+    }
+
+    return { total, unresolved, resolved, escalated };
   },
 });

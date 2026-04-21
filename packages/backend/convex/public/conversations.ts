@@ -2,7 +2,7 @@ import { mutation, query } from "../_generated/server.js";
 import { ConvexError, v } from "convex/values";
 import { supportAgent } from "../system/ai/agents/supportAgent.js";
 import { saveMessage, vMessageDoc } from "@convex-dev/agent";
-import { components } from "../_generated/api.js";
+import { components, internal } from "../_generated/api.js";
 import { paginationOptsValidator } from "convex/server";
 import { MessageDoc } from "@convex-dev/agent";
 
@@ -42,7 +42,7 @@ export const getMany = query({
         });
 
         if (messages.page.length > 0) {
-          lastMessage = messages.page[0];
+          lastMessage = messages.page[0] ?? null;
         }
 
         return {
@@ -74,6 +74,10 @@ export const create = mutation({
     if (session.expiresAt < now) {
       throw new ConvexError("Contact session has expired");
     }
+
+    await ctx.runMutation(internal.system.contactSessions.refresh, {
+      contactSessionId: contactSessionId,
+    });
     const widgetSettings = await ctx.db.query("widgetSettings")
       .first();
     if (!widgetSettings) {

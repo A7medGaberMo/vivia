@@ -4,7 +4,7 @@
 import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
-import { Loader2Icon, PlugZapIcon, SparklesIcon } from "lucide-react";
+import { Loader2Icon, SparklesIcon, PaletteIcon, InfoIcon } from "lucide-react";
 
 import { CustomizationForm } from "../components/customization-form";
 
@@ -16,7 +16,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@workspace/ui/components/card";
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
 
 export const CustomizationView = () => {
     const widgetSettings = useQuery(api.private.widgetSettings.getOne);
@@ -27,54 +26,50 @@ export const CustomizationView = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-muted">
-                <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center gap-3 p-8">
+            <div className="w-full py-4">
+                <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-3 py-24">
                     <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
                     <div className="space-y-1 text-center">
-                        <p className="text-sm font-medium">Loading customization…</p>
-                        <p className="text-xs text-muted-foreground">
-                            Just a moment while we fetch your widget settings.
-                        </p>
+                        <p className="text-sm font-medium">Loading settings…</p>
+                        <p className="text-xs text-muted-foreground">Fetching your widget configuration.</p>
                     </div>
                 </div>
             </div>
         );
     }
 
-    // If your getOne can return null (no record yet)
     if (!widgetSettings) {
         return (
-            <div className="min-h-screen bg-muted">
-                <div className="mx-auto w-full max-w-3xl space-y-8 p-6 md:p-10">
-                    <div className="space-y-2">
-                        <h1 className="text-2xl font-bold tracking-tight md:text-4xl">
-                            Widget customization
-                        </h1>
-                        <p className="text-sm text-muted-foreground">
-                            Set up how your widget looks and what it says to customers.
+            <div className="w-full space-y-10 py-4">
+                <div className="mx-auto w-full max-w-5xl space-y-10">
+                    {/* Header */}
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-primary">
+                            <PaletteIcon size={18} />
+                            <span className="text-sm font-semibold uppercase tracking-wider">
+                                Widget Settings
+                            </span>
+                        </div>
+                        <h1 className="text-4xl font-bold tracking-tight">Widget Customization</h1>
+                        <p className="text-lg text-muted-foreground">
+                            Customize how your widget looks and what it says.
                         </p>
                     </div>
 
-                    <Card className="shadow-sm">
+                    <Card className="border-border/60 shadow-md">
                         <CardHeader className="space-y-1">
                             <CardTitle className="flex items-center gap-2">
                                 <SparklesIcon className="h-5 w-5 text-muted-foreground" />
                                 No settings yet
                             </CardTitle>
                             <CardDescription>
-                                We couldn’t find widget settings for your workspace. Create the
-                                default settings first, then refresh this page.
+                                No widget record found. Create one first, then refresh.
                             </CardDescription>
                         </CardHeader>
-
                         <CardContent>
-                            <Alert>
-                                <AlertTitle>What you can do</AlertTitle>
-                                <AlertDescription className="text-sm">
-                                    Create your widget settings record (greeting message + default
-                                    suggestions), then refresh this page.
-                                </AlertDescription>
-                            </Alert>
+                            <p className="text-sm text-muted-foreground">
+                                Set up your greeting message and quick suggestions, then come back here to customize.
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
@@ -83,38 +78,37 @@ export const CustomizationView = () => {
     }
 
     return (
-        <div className="min-h-screen bg-muted">
-            <div className="mx-auto w-full max-w-2xl space-y-8 p-6 md:p-10 lg:max-w-3xl xl:max-w-4xl">
+        <div className="w-full space-y-10 py-4">
+            <div className="mx-auto w-full max-w-5xl space-y-8">
                 {/* Header */}
-                <div className="space-y-2">
-                    <h1 className="text-2xl font-bold tracking-tight md:text-4xl">
-                        Widget customization
-                    </h1>
-                    <p className="text-sm text-muted-foreground">
-                        Make your widget feel on-brand — greeting message, quick suggestions,
-                        and voice settings.
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-primary">
+                        <PaletteIcon size={18} />
+                        <span className="text-sm font-semibold uppercase tracking-wider">
+                            Widget Settings
+                        </span>
+                    </div>
+                    <h1 className="text-4xl font-bold tracking-tight">Widget Customization</h1>
+                    <p className="text-lg text-muted-foreground">
+                        Customize how your widget looks and what it says.
                     </p>
                 </div>
 
-                {/* Optional info if Vapi is not connected */}
+                {/* Slim Vapi info strip */}
                 {!hasVapiPlugin && (
-                    <Alert>
-                        <div className="flex items-start gap-3">
-                            <PlugZapIcon className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                            <div>
-                                <AlertTitle>Voice isn’t connected yet</AlertTitle>
-                                <AlertDescription className="text-sm">
-                                    You can still customize your widget text and suggestions.
-                                    Connect Vapi to enable voice calling settings.
-                                </AlertDescription>
-                            </div>
-                        </div>
-                    </Alert>
+                    <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                        <InfoIcon className="h-4 w-4 shrink-0" />
+                        <span>
+                            Voice calling is not enabled.{" "}
+                            <span className="font-medium text-foreground">Connect Vapi in Plugins</span>{" "}
+                            to unlock voice settings.
+                        </span>
+                    </div>
                 )}
 
                 {/* Form */}
                 <CustomizationForm
-                    initialData={widgetSettings}
+                    initialData={widgetSettings ?? null}
                     hasVapiPlugin={hasVapiPlugin}
                 />
             </div>

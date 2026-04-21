@@ -12,6 +12,7 @@ import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner"
+import { ConvexError } from "convex/values";
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -173,9 +174,14 @@ const VapiPluginRemoveForm = ({
             });
             setOpen(false);
             toast.success("Vapi plugin removed")
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error("Failed to remove plugin");
+            if (error?.data?.code === "NOT-FOUND" || error?.message?.includes("NOT-FOUND")) {
+                toast.error("Plugin already removed or not found");
+                setOpen(false);
+            } else {
+                toast.error(error?.data?.message || "Failed to remove plugin");
+            }
         }
     };
     return (
@@ -226,17 +232,23 @@ export const VapiView = () => {
         <>
             <VapiPluginForm open={connectOpen} setOpen={setConnectOpen} />
             <VapiPluginRemoveForm open={removeOpen} setOpen={setRemoveOpen} />
-            <div className="flex min-h-screen flex-col bg-muted p-8">
-                <div className="mx-auto w-full max-w-screen-md">
-                    <div className="space-y-2">
-                        <h1 className="text-2xl md:text-4xl">Vapi Plugin</h1>
-                        <p className="text-muted-foreground">Connect Vapi to enable AI voice calls & phone support</p>
-
+            <div className="w-full space-y-10 py-4">
+                <div className="mx-auto w-full max-w-5xl space-y-10">
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-primary">
+                            <WorkflowIcon size={20} className="fill-current" />
+                            <span className="text-sm font-semibold uppercase tracking-wider">
+                                Voice Integration
+                            </span>
+                        </div>
+                        <h1 className="text-4xl font-bold tracking-tight">Vapi Configuration</h1>
+                        <p className="max-w-2xl text-lg text-muted-foreground">
+                            Connect your Vapi account to enable AI-powered voice calls, automated customer support, and seamless phone integration.
+                        </p>
                     </div>
                     <div className="mt-8">
                         {vapiPlugin ? (
                             <VapiConnectedView onDisconnect={toggleConnection} />
-
                         ) : (
                             <PluginCard
                                 serviceImage="/vapi.jpg"
@@ -244,13 +256,10 @@ export const VapiView = () => {
                                 features={vapiFeatures}
                                 isDisabled={vapiPlugin === undefined}
                                 onSubmit={toggleConnection}
-
                             />
                         )}
                     </div>
-
                 </div>
-
             </div>
         </>
     )

@@ -106,7 +106,7 @@ export const WidgetChatScreen = () => {
   const threadId = conversation?.threadId;
   const isResolved = conversation?.status === "resolved";
   const isEscalated = conversation?.status === "escalated";
-  const isDone = isResolved || isEscalated;
+  const isDone = isResolved;
 
   const suggestions = useMemo(() => {
     const vals = Object.values(widgetSettings?.defaultSuggestions ?? {});

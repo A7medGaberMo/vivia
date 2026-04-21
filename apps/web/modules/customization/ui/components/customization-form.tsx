@@ -26,12 +26,15 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { Separator } from "@workspace/ui/components/separator";
+import { Badge } from "@workspace/ui/components/badge";
 
 import {
     Loader2Icon,
     SaveIcon,
     MessageSquareTextIcon,
     LightbulbIcon,
+    MicIcon,
+    CheckCircle2Icon,
 } from "lucide-react";
 
 import { Doc } from "@workspace/backend/convex/_generated/dataModel";
@@ -47,6 +50,8 @@ interface CustomizationFormProps {
     initialData: WidgetSettings | null;
     hasVapiPlugin: boolean;
 }
+
+const MAX_GREET = 200;
 
 export const CustomizationForm = ({
     initialData,
@@ -73,6 +78,7 @@ export const CustomizationForm = ({
 
     const isSubmitting = form.formState.isSubmitting;
     const isDirty = form.formState.isDirty;
+    const greetValue = form.watch("greetMessage") ?? "";
 
     const onSubmit = async (values: FormSchema) => {
         if (!isDirty) {
@@ -104,11 +110,11 @@ export const CustomizationForm = ({
                 vapiSettings,
             });
 
-            toast.success("Saved", {
-                description: "Your widget customization has been updated.",
+            toast.success("Saved!", {
+                description: "Widget customization updated.",
             });
 
-            form.reset(values); // clear dirty state
+            form.reset(values);
         } catch (error) {
             console.error(error);
             toast.error("Save failed", {
@@ -121,24 +127,35 @@ export const CustomizationForm = ({
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* Chat basics */}
-                <Card className="shadow-sm">
+                <Card className="border-border/60 shadow-md">
                     <CardHeader className="space-y-1">
                         <CardTitle className="flex items-center gap-2">
                             <MessageSquareTextIcon className="h-5 w-5 text-muted-foreground" />
-                            Chat basics
+                            Chat Basics
                         </CardTitle>
                         <CardDescription>
-                            Customize what users see when they open your widget.
+                            What users see when they open your widget.
                         </CardDescription>
                     </CardHeader>
 
                     <CardContent className="space-y-6">
+                        {/* Greeting message */}
                         <FormField
                             control={form.control}
                             name="greetMessage"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Greeting message</FormLabel>
+                                    <div className="flex items-center justify-between">
+                                        <FormLabel>Greeting message</FormLabel>
+                                        <span
+                                            className={`text-xs tabular-nums ${greetValue.length > MAX_GREET
+                                                ? "text-destructive"
+                                                : "text-muted-foreground"
+                                                }`}
+                                        >
+                                            {greetValue.length} / {MAX_GREET}
+                                        </span>
+                                    </div>
                                     <FormControl>
                                         <Textarea
                                             placeholder="Hi! How can I help you?"
@@ -147,7 +164,7 @@ export const CustomizationForm = ({
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        This message appears when the widget opens.
+                                        Shown when the widget first opens.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -157,59 +174,48 @@ export const CustomizationForm = ({
                         <Separator />
 
                         {/* Quick suggestions */}
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2">
                                     <LightbulbIcon className="h-4 w-4 text-muted-foreground" />
                                     <p className="text-sm font-medium">Quick suggestions</p>
                                 </div>
                                 <p className="text-sm text-muted-foreground">
-                                    Add up to 3 short buttons users can tap (great for FAQs).
+                                    Up to 3 shortcut buttons for common questions.
                                 </p>
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <FormField
-                                    control={form.control}
-                                    name="defaultSuggestions.suggestion1"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Suggestion 1</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Business hours" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="defaultSuggestions.suggestion2"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Suggestion 2</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Refund policy" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="defaultSuggestions.suggestion3"
-                                    render={({ field }) => (
-                                        <FormItem className="md:col-span-2">
-                                            <FormLabel>Suggestion 3</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Store location" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                {(
+                                    [
+                                        { name: "defaultSuggestions.suggestion1", label: "Suggestion 1", placeholder: "Business hours", span: false },
+                                        { name: "defaultSuggestions.suggestion2", label: "Suggestion 2", placeholder: "Refund policy", span: false },
+                                        { name: "defaultSuggestions.suggestion3", label: "Suggestion 3", placeholder: "Store location", span: true },
+                                    ] as const
+                                ).map(({ name, label, placeholder, span }) => (
+                                    <FormField
+                                        key={name}
+                                        control={form.control}
+                                        name={name}
+                                        render={({ field }) => (
+                                            <FormItem className={span ? "md:col-span-2" : ""}>
+                                                <FormLabel className="flex items-center gap-1.5">
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="h-5 w-5 justify-center rounded-full p-0 text-[10px] font-bold"
+                                                    >
+                                                        {label.slice(-1)}
+                                                    </Badge>
+                                                    {label}
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder={placeholder} {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                ))}
                             </div>
                         </div>
                     </CardContent>
@@ -217,11 +223,17 @@ export const CustomizationForm = ({
 
                 {/* Voice settings */}
                 {hasVapiPlugin && (
-                    <Card className="shadow-sm">
+                    <Card className="border-border/60 shadow-md">
                         <CardHeader className="space-y-1">
-                            <CardTitle>Voice (Vapi)</CardTitle>
+                            <CardTitle className="flex items-center gap-2">
+                                <MicIcon className="h-5 w-5 text-muted-foreground" />
+                                Voice Integration (Vapi)
+                                <Badge variant="secondary" className="ml-auto text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                                    Connected
+                                </Badge>
+                            </CardTitle>
                             <CardDescription>
-                                Choose the assistant and phone number used for voice calls.
+                                Pick the assistant and phone number for voice calls.
                             </CardDescription>
                         </CardHeader>
 
@@ -233,20 +245,31 @@ export const CustomizationForm = ({
 
                 {/* Sticky Save bar */}
                 <div className="sticky bottom-4 z-10">
-                    <div className="rounded-xl border bg-background shadow-sm">
-                        <div className="flex items-start justify-between gap-4 p-4 md:p-5">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium">Ready to save?</p>
-                                <p className="text-xs text-muted-foreground">
-                                    Tip: keep suggestions short (2–4 words) so they fit nicely on
-                                    mobile.
-                                </p>
+                    <div className="rounded-xl border border-border/60 bg-background/95 shadow-lg backdrop-blur-sm">
+                        <div className="flex items-center justify-between gap-4 p-4 md:p-5">
+                            <div className="flex items-center gap-3">
+                                {isDirty ? (
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                                    </span>
+                                ) : (
+                                    <CheckCircle2Icon className="h-4 w-4 text-muted-foreground/50" />
+                                )}
+                                <div className="space-y-0.5">
+                                    <p className={`text-sm font-medium ${!isDirty ? "text-muted-foreground" : ""}`}>
+                                        {isDirty ? "You have unsaved changes" : "All changes saved"}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Keep suggestions short — 2 to 4 words works best.
+                                    </p>
+                                </div>
                             </div>
 
                             <Button
                                 type="submit"
                                 disabled={isSubmitting || !isDirty}
-                                className="min-w-[150px]"
+                                className="min-w-[140px]"
                             >
                                 {isSubmitting ? (
                                     <>

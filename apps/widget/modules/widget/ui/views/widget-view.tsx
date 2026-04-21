@@ -10,9 +10,7 @@ import { JSX } from "react";
 import { WidgetErrorScreen } from "../screens/WidgetErrorScreen";
 import { WidgetLoadingScreen } from "../screens/WidgetLoadingScreen";
 import { WidgetInboxScreen } from "../screens/widgetInboxScreen";
-interface WidgetViewProps {
-  children: React.ReactNode;
-}
+interface WidgetViewProps {}
 
 import { WidgetSelectionScreen } from "../screens/WidgetSelectionScreen";
 import { WidgetVoiceScreen } from "../screens/Widget-Voice-Screen";
@@ -26,7 +24,7 @@ const PlaceHolder = ({ name }: { name: string }) => {
   );
 };
 
-export const WidgetView = ({ children }: WidgetViewProps) => {
+export const WidgetView = ({}: WidgetViewProps) => {
   const screen = useAtomValue(widgetScreenAtom);
 
   const screenComponent: Record<WidgetScreen, JSX.Element> = {

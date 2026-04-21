@@ -10,20 +10,31 @@ import {
 } from "@workspace/ui/components/table";
 import { Button } from "@workspace/ui/components/button";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@workspace/ui/components/dropdown-menu";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@workspace/ui/components/tooltip";
 import { Badge } from "@workspace/ui/components/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
 import { usePaginatedQuery } from "convex/react";
 import { api } from "@workspace/backend/convex/_generated/api";
 import {
   FileIcon,
-  MoreHorizontalIcon,
   PlusIcon,
-  TrashIcon,
+  Trash2Icon,
+  DatabaseIcon,
+  SearchIcon,
+  FileTextIcon,
+  Loader2Icon,
+  UploadCloudIcon,
 } from "lucide-react";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/InfiniteScrollTrigger";
 import { useState } from "react";
@@ -74,113 +85,169 @@ export const FilesView = () => {
       <UploadDialog
         onOpenChange={setUploadDialogOpen}
         open={uploadDialogOpen}
-
       />
-      <div className="flex min-h-screen flex-col bg-muted p-8">
-        <div className="mx-auto w-full max-w-screen-md">
-          <div className="space-y-2">
-            <h1 className="text-2xl md:text-4xl">Knowledge Base</h1>
-            <p className="text-muted-foreground">
-              Upload & Manage Your Documents for Your AI Assistant
+
+      <div className="w-full space-y-10 py-4">
+        <div className="mx-auto w-full max-w-5xl space-y-10">
+          {/* Header */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-primary">
+              <DatabaseIcon size={20} className="fill-current" />
+              <span className="text-sm font-semibold uppercase tracking-wider">
+                Knowledge Base
+              </span>
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight">
+              Your Documents
+            </h1>
+            <p className="max-w-2xl text-lg text-muted-foreground">
+              Upload documents to train your AI assistant—each file is processed for instant answers.
+
             </p>
           </div>
 
-          <div className="mt-8 rounded-lg border bg-background">
-            <div className="flex items-center justify-end border-b px-6 py-4">
-              <Button onClick={() => setUploadDialogOpen(true)}>
-                <PlusIcon className="mr-2 h-4 w-4" />
-                Upload Files
-              </Button>
-            </div>
-
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="px-6 py-4 font-medium">
-                    File Name
-                  </TableHead>
-                  <TableHead className="px-6 py-4 font-medium">
-                    File Type
-                  </TableHead>
-                  <TableHead className="px-6 py-4 font-medium">
-                    File Size
-                  </TableHead>
-                  <TableHead className="px-6 py-4 font-medium">
-                    File Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {isLoadingFirstPage && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
-                )}
-
-                {!isLoadingFirstPage && files.results.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
-                      No Files Found
-                    </TableCell>
-                  </TableRow>
-                )}
-
-                {files.results.map((file) => (
-                  <TableRow key={file.id} className="hover:bg-muted/50">
-                    <TableCell className="px-6 py-4 font-medium">
-                      <div className="flex items-center gap-3">
-                        <FileIcon className="h-4 w-4" />
-                        {file.name}
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="px-6 py-4">
-                      <Badge variant="outline" className="uppercase">
-                        {file.type}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell className="px-6 py-4 text-muted-foreground">
-                      {file.size}
-                    </TableCell>
-
-                    <TableCell className="px-6 py-4">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="sm" variant="ghost" className="size-8 p-0">
-                            <MoreHorizontalIcon className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-
-                        <DropdownMenuContent>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDeleteClick(file)}>
-                            <TrashIcon className="mr-2 size-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-
-            {!isLoadingFirstPage && files.results.length > 0 && (
-              <div className="border-t">
-                <InfiniteScrollTrigger
-                  canLoadMore={canLoadMore}
-                  isLoadingMore={isLoadingMore}
-                  onLoadMore={handleLoadMore}
-                  ref={topElementRef}
-                />
+          {/* Documents Card */}
+          <Card className="border-border/60 shadow-md">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <FileTextIcon className="text-muted-foreground" size={18} />
+                    <CardTitle className="text-lg">All Documents</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Supported formats: PDF, TXT, CSV, and DOC.
+                  </CardDescription>
+                </div>
+                <Button
+                  onClick={() => setUploadDialogOpen(true)}
+                  className="gap-2 px-6 shadow-sm transition-all duration-300 hover:shadow-md"
+                >
+                  <UploadCloudIcon className="h-4 w-4" />
+                  Upload
+                </Button>
               </div>
-            )}
-          </div>
+            </CardHeader>
+
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border/60 hover:bg-transparent">
+                    <TableHead className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      File Name
+                    </TableHead>
+                    <TableHead className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Type
+                    </TableHead>
+                    <TableHead className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Size
+                    </TableHead>
+                    <TableHead className="w-[60px] px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {isLoadingFirstPage && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-32 text-center">
+                        <div className="flex flex-col items-center justify-center gap-3">
+                          <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
+                          <p className="text-sm text-muted-foreground">Fetching your documents…</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+
+                  {!isLoadingFirstPage && files.results.length === 0 && (
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell colSpan={4} className="h-48 text-center">
+                        <div className="flex flex-col items-center justify-center gap-4">
+                          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/5 text-primary">
+                            <UploadCloudIcon className="h-6 w-6" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm font-semibold">No documents uploaded</p>
+                            <p className="text-sm text-muted-foreground">
+                              Start by uploading a file — your AI assistant will learn from it instantly.
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="mt-1 gap-2"
+                            onClick={() => setUploadDialogOpen(true)}
+                          >
+                            <PlusIcon className="h-3.5 w-3.5" />
+                            Upload Your First File
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+
+                  {files.results.map((file) => (
+                    <TableRow
+                      key={file.id}
+                      className="group border-border/40 transition-colors duration-200 hover:bg-muted/50"
+                    >
+                      <TableCell className="px-6 py-4 font-medium">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-primary transition-colors group-hover:bg-primary/10">
+                            <FileIcon className="h-4 w-4" />
+                          </div>
+                          <span className="truncate">{file.name}</span>
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="px-6 py-4">
+                        <Badge
+                          variant="outline"
+                          className="uppercase text-[10px] font-bold tracking-wider"
+                        >
+                          {file.type}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell className="px-6 py-4 text-sm text-muted-foreground">
+                        {file.size}
+                      </TableCell>
+
+                      <TableCell className="px-6 py-4 text-right">
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="size-8 p-0 text-muted-foreground/60 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+                                onClick={() => handleDeleteClick(file)}
+                              >
+                                <Trash2Icon className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="text-xs">
+                              Delete document
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {!isLoadingFirstPage && files.results.length > 0 && (
+                <div className="border-t border-border/40">
+                  <InfiniteScrollTrigger
+                    canLoadMore={canLoadMore}
+                    isLoadingMore={isLoadingMore}
+                    onLoadMore={handleLoadMore}
+                    ref={topElementRef}
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </>

@@ -1,3 +1,4 @@
+import { Id } from "@workspace/backend/convex/_generated/dataModel";
 import { ConversationsViewId } from "@/modules/dashboard/ui/views/ConversationsViewId";
 
 interface PageProps {
@@ -10,7 +11,7 @@ const Page = async ({ params }: PageProps) => {
   // Await params to extract the ID
   const { conversationId } = await params;
 
-  return <ConversationsViewId conversationId={conversationId as any} />;
+  return <ConversationsViewId conversationId={conversationId as Id<"conversations">} />;
 };
 
 export default Page;

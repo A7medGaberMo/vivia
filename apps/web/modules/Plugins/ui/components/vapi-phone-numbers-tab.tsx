@@ -3,7 +3,8 @@
 import {
     CheckCircleIcon,
     PhoneIcon,
-    XCircleIcon
+    XCircleIcon,
+    ClockIcon
 } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@workspace/ui/components/badge"
@@ -79,10 +80,15 @@ export const VapiPhoneNumbersTab = () => {
                                 </TableCell>
                                 <TableCell className="px-6 py-4">
                                     <Badge className="capitalize"
-                                        variant={phoneNumber.status === "active" ? "default" : "destructive"}
+                                        variant={
+                                            phoneNumber?.status?.toLowerCase() === "active" ? "default" :
+                                            phoneNumber?.status?.toLowerCase() === "pending" ? "secondary" :
+                                            "destructive"
+                                        }
                                     >
-                                        {phoneNumber.status === "active" && <CheckCircleIcon className="mr-1 size-3" />}
-                                        {phoneNumber.status !== "active" && <XCircleIcon className="mr-1 size-3" />}
+                                        {phoneNumber?.status?.toLowerCase() === "active" && <CheckCircleIcon className="mr-1 size-3" />}
+                                        {phoneNumber?.status?.toLowerCase() === "pending" && <ClockIcon className="mr-1 size-3" />}
+                                        {phoneNumber?.status?.toLowerCase() !== "active" && phoneNumber?.status?.toLowerCase() !== "pending" && <XCircleIcon className="mr-1 size-3" />}
                                         {phoneNumber.status || "Unknown"}
                                     </Badge>
                                 </TableCell>
