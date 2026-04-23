@@ -4,6 +4,25 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": [
+        "CONVEX_PROJECT",
+        "CONVEX_DEPLOYMENT",
+        "CONVEX_URL",
+        "CONVEX_DEPLOY_KEY",
+        "NEXT_PUBLIC_CONVEX_URL",
+        "CLERK_SECRET_KEY",
+        "CLERK_JWT_ISSUER_DOMAIN",
+        "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+        "NEXT_PUBLIC_CLERK_FRONTEND_API",
+        "NEXT_PUBLIC_CLERK_SIGN_IN_URL",
+        "NEXT_PUBLIC_CLERK_SIGN_UP_URL",
+        "NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL",
+        "NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL",
+        "GOOGLE_GENERATIVE_AI_API_KEY",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION"
+      ],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },

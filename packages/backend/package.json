@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "convex dev ",
-    "build": "convex dev --until-success"
+    "build": "convex deploy"
   },
   "exports": {
     "./convex/*": "./convex/*"
